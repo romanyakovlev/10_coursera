@@ -11,7 +11,7 @@ import json
 def get_courses_list():
     xml_page = requests.get('https://www.coursera.org/sitemap~www~courses.xml')
     root = etree.fromstring(xml_page.content)
-    random_courses = [course[0].text for course in random.sample(set(root), 2)]
+    random_courses = [course[0].text for course in random.sample(set(root), 20)]
     return random_courses
 
 
@@ -58,7 +58,7 @@ def output_courses_info_to_xlsx(filepath):
 
 
 if __name__ == '__main__':
-    filepath = '{}.xlsx'.format(input('Enter file that will consist information about courses (without ".xlsx" part):\n'))
+    filepath = input('Enter file that will consist information about courses:\n')
     print('Start parsing of 20 any random Coursera courses')
     output_courses_info_to_xlsx(filepath)
     print('Done. Data stored to {}'.format(filepath))

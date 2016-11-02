@@ -41,7 +41,7 @@ def get_course_info(course_slug):
 def output_courses_info_to_xlsx(filepath):
     wb = Workbook()
     ws = wb.active
-    for column_counter, value in enumerate(['Name', 'Rating', 'Language', 'Start Date','Weeks Amount']):
+    for column_counter, value in enumerate(['Name', 'Rating', 'Language', 'Start Date', 'Weeks Amount']):
         column_counter += 1
         _ = ws.cell(column = column_counter, row = 1, value = value)
     coursers_list = get_courses_list()

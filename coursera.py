@@ -20,16 +20,18 @@ def get_course_info(course_slug):
     html_doc = requests.get(full_path).content
     soup = BeautifulSoup(html_doc, 'html.parser')
     try:
-        date_json = json.loads(requests.get('https://api.coursera.org/api/courses.v1/?q=slug&slug=' +
-        course_slug + '&fields=upcomingSessionStartDate').text)['elements'][0]['upcomingSessionStartDate']
+        request_params = {"q" : "slug", "slug" : course_slug, "fields" : "upcomingSessionStartDate"}
+        date_json = json.loads(requests.get("https://api.coursera.org/api/courses.v1/",
+            params = request_params).text)['elements'][0]['upcomingSessionStartDate']
         course_start_date = date.fromtimestamp(date_json / 1000.0)
-    except:
-        date_json = json.loads(requests.get('https://api.coursera.org/api/courses.v1/?q=slug&slug=' +
-        course_slug + '&fields=plannedLaunchDate').text)['elements'][0]['plannedLaunchDate']
+    except KeyError:
+        request_params = {"q" : "slug", "slug" : course_slug, "fields" : "plannedLaunchDate"}
+        date_json = json.loads(requests.get("https://api.coursera.org/api/courses.v1/",
+            params = request_params).text)['elements'][0]['plannedLaunchDate']
         course_start_date = date_json
     try:
         course_rating = soup.find(class_ = 'ratings-text').text
-    except:
+    except AttributeError:
         course_rating = 'No rating'
     course_name = soup.find(class_ = 'course-name-text').text
     course_language = soup.find(class_ = 'language-info').text
@@ -41,24 +43,21 @@ def get_course_info(course_slug):
 def output_courses_info_to_xlsx(filepath):
     wb = Workbook()
     ws = wb.active
-    for column_counter, value in enumerate(['Name', 'Rating', 'Language', 'Start Date', 'Weeks Amount']):
-        column_counter += 1
-        _ = ws.cell(column = column_counter, row = 1, value = value)
+    arr = iter(['Name', 'Rating', 'Language', 'Start Date','Weeks Amount'])
+    for cells in ws.iter_rows(max_row=1,max_col=5,min_row=1):
+        for cell in cells:
+            cell.value = next(arr)
     coursers_list = get_courses_list()
-    for course_counter, course in enumerate(coursers_list):
-        course_counter += 1
-        row_counter = course_counter + 1
+    for cells, course in zip(ws.iter_rows(max_row=21,max_col=5,min_row=2), coursers_list):
         course_slug = course.split('/')[-1]
-        course_values = get_course_info(course_slug)
-        for column_counter, value in enumerate(course_values):
-            column_counter += 1
-            _ = ws.cell(column = column_counter, row = row_counter , value = str(value))
-        print('{0}/{1} courses parsed'.format(course_counter, len(coursers_list)), end='\r')
+        params = get_course_info(course_slug)
+        for cell, param in zip(cells, params):
+            cell.value = param
     wb.save(filepath)
 
 
 if __name__ == '__main__':
     filepath = input('Enter file that will consist information about courses:\n')
-    print('Start parsing of 20 any random Coursera courses')
+    print('Start parsing of 20 any random Coursera courses. You need to wait a little bit...')
     output_courses_info_to_xlsx(filepath)
     print('Done. Data stored to {}'.format(filepath))

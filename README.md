@@ -8,6 +8,7 @@
 - beautifulsoup4
 - requests
 - openpyxl 
+- lmxl
 
 ```sh
 pip install -r requirements.txt

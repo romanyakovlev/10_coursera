@@ -24,7 +24,8 @@ def get_course_info(course_slug):
         request_params = {"q": "slug", "slug": course_slug, "fields": "upcomingSessionStartDate"}
         date_json = json.loads(requests.get("https://api.coursera.org/api/courses.v1/",
                                params=request_params).text)['elements'][0]['upcomingSessionStartDate']
-        course_start_date = date.fromtimestamp(date_json / 1000.0)
+        milliseconds = 1000.0
+        course_start_date = date.fromtimestamp(date_json / milliseconds)
     except KeyError:
         request_params = {"q": "slug", "slug": course_slug, "fields": "plannedLaunchDate"}
         date_json = json.loads(requests.get("https://api.coursera.org/api/courses.v1/",

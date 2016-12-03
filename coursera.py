@@ -23,12 +23,12 @@ def get_course_info(course_slug):
     try:
         request_params = {"q": "slug", "slug": course_slug, "fields": "upcomingSessionStartDate"}
         date_json = json.loads(requests.get("https://api.coursera.org/api/courses.v1/",
-            params=request_params).text)['elements'][0]['upcomingSessionStartDate']
+                               params=request_params).text)['elements'][0]['upcomingSessionStartDate']
         course_start_date = date.fromtimestamp(date_json / 1000.0)
     except KeyError:
         request_params = {"q": "slug", "slug": course_slug, "fields": "plannedLaunchDate"}
         date_json = json.loads(requests.get("https://api.coursera.org/api/courses.v1/",
-            params=request_params).text)['elements'][0]['plannedLaunchDate']
+                               params=request_params).text)['elements'][0]['plannedLaunchDate']
         course_start_date = date_json
     try:
         course_rating = soup_data.find(class_='ratings-text').text
@@ -47,7 +47,7 @@ def output_courses_info_to_xlsx(filepath):
     fields_name = iter(['Name', 'Rating', 'Language', 'Start Date','Weeks Amount'])
     min_row_num, max_row_num, max_col_num  = 1, 1, 5
     for cells in worksheet.iter_rows(max_row=max_row_num,
-                                                        max_col=max_col_num, min_row=min_row_num):
+                                     max_col=max_col_num, min_row=min_row_num):
         for cell in cells:
             cell.value = next(fields_name)
     coursers_list = get_courses_list()
@@ -57,8 +57,8 @@ def output_courses_info_to_xlsx(filepath):
             coursers_list):
         course_slug = course.split('/')[-1]
         course_params = get_course_info(course_slug)
-        for cell, param in zip(cells, course_params):
-            cell.value = param
+        for cell, parameter in zip(cells, course_params):
+            cell.value = parameter
     workbook.save(filepath)
 
 

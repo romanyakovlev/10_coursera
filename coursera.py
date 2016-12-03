@@ -2,7 +2,6 @@ from lxml import etree
 from bs4 import BeautifulSoup
 from datetime import date
 from openpyxl import Workbook
-
 import requests
 import random
 import json

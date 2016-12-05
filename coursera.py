@@ -8,7 +8,7 @@ import json
 
 
 def get_courses_list():
-    courses_amount = 3
+    courses_amount = 20
     xml_page = requests.get('https://www.coursera.org/sitemap~www~courses.xml')
     xml_root = etree.fromstring(xml_page.content)
     random_courses = [course[0].text for course in random.sample(set(xml_root), courses_amount)]
@@ -19,17 +19,19 @@ def get_course_info(course_slug):
     full_path = 'https://www.coursera.org/learn/{}'.format(course_slug)
     html_doc = requests.get(full_path).content
     soup_data = BeautifulSoup(html_doc, 'html.parser')
+    request_params = {"q": "slug", "slug": course_slug,
+                                   "fields": "plannedLaunchDate,upcomingSessionStartDate"}
+    response_json = json.loads(requests.get("https://api.coursera.org/api/courses.v1/",
+                                                                     params=request_params).text)
+    session_dates = response_json['elements'][0]
     try:
-        request_params = {"q": "slug", "slug": course_slug, "fields": "upcomingSessionStartDate"}
-        date_json = json.loads(requests.get("https://api.coursera.org/api/courses.v1/",
-                               params=request_params).text)['elements'][0]['upcomingSessionStartDate']
-        milliseconds = 1000.0
-        course_start_date = date.fromtimestamp(date_json / milliseconds)
+        timestamp_in_millisecs = session_dates['upcomingSessionStartDate']
+        millisecs_in_seconds = 1000.0
+        timestamp_in_secs = timestamp_in_millisecs / millisecs_in_seconds
+        course_start_date = date.fromtimestamp(timestamp_in_secs)
     except KeyError:
-        request_params = {"q": "slug", "slug": course_slug, "fields": "plannedLaunchDate"}
-        date_json = json.loads(requests.get("https://api.coursera.org/api/courses.v1/",
-                               params=request_params).text)['elements'][0]['plannedLaunchDate']
-        course_start_date = date_json
+        date_from_json = session_dates['plannedLaunchDate']
+        course_start_date = date_from_json
     try:
         course_rating = soup_data.find(class_='ratings-text').text
     except AttributeError:

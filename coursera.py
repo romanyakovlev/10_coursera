@@ -20,9 +20,9 @@ def get_course_info(course_slug):
     html_doc = requests.get(full_path).content
     soup_data = BeautifulSoup(html_doc, 'html.parser')
     request_params = {"q": "slug", "slug": course_slug,
-                                   "fields": "plannedLaunchDate,upcomingSessionStartDate"}
+                      "fields": "plannedLaunchDate,upcomingSessionStartDate"}
     response_json = json.loads(requests.get("https://api.coursera.org/api/courses.v1/",
-                                                                     params=request_params).text)
+                               params=request_params).text)
     session_dates = response_json['elements'][0]
     try:
         timestamp_in_millisecs = session_dates['upcomingSessionStartDate']

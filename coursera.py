@@ -22,21 +22,19 @@ def get_course_info(course_slug):
     request_params = {"q": "slug", "slug": course_slug,
                       "fields": "plannedLaunchDate,upcomingSessionStartDate"}
     response_json = json.loads(requests.get("https://api.coursera.org/api/courses.v1/",
-                               params=request_params).text)
+                                            params=request_params).text)
     session_dates = response_json['elements'][0]
-    try:
+    if 'upcomingSessionStartDate' in session_dates.keys():
         timestamp_in_millisecs = session_dates['upcomingSessionStartDate']
-    except KeyError:
-        session_dates["upcomingSessionStartDate"] = None
-    if session_dates["upcomingSessionStartDate"]:
         millisecs_in_seconds = 1000.0
         timestamp_in_secs = timestamp_in_millisecs / millisecs_in_seconds
         course_start_date = date.fromtimestamp(timestamp_in_secs)
     else:
         course_start_date = session_dates['plannedLaunchDate']
-    try:
+    rating_data = soup_data.find(class_='ratings-text')
+    if rating_data:
         course_rating = soup_data.find(class_='ratings-text').text
-    except AttributeError:
+    else:
         course_rating = 'No rating'
     course_name = soup_data.find(class_='course-name-text').text
     course_language = soup_data.find(class_='language-info').text
